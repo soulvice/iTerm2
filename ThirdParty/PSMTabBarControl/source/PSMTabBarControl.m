@@ -1231,7 +1231,7 @@ const NSInteger kPSMStartResizeAnimation = 0;
 
 - (BOOL)mouseDownCanMoveWindow
 {
-    return NO;
+    return YES;
 }
 
 - (BOOL)acceptsFirstMouse:(NSEvent *)theEvent

@@ -268,5 +268,13 @@
                            silenceable:kiTermWarningTypePermanentlySilenceable];
 }
 
+#pragma mark - Margins
+- (void)changeMargin
+{
+    
+    
+    [self updateScreen];
+}
+
 
 @end

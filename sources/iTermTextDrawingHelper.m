@@ -80,6 +80,8 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
             _drawRectDuration.alpha = 0.95;
             _drawRectInterval.alpha = 0.95;
         }
+        self.horizontalMargin = 15;
+        self.verticalMargin = 15;
     }
     return self;
 }
@@ -273,7 +275,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
                          runs:(NSArray *)runs {
     for (iTermBoxedBackgroundColorRun *box in runs) {
         iTermBackgroundColorRun *run = box.valuePointer;
-        NSRect rect = NSMakeRect(floor(MARGIN + run->range.location * _cellSize.width),
+        NSRect rect = NSMakeRect(floor(self.horizontalMargin + run->range.location * _cellSize.width),
                                  yOrigin,
                                  ceil(run->range.length * _cellSize.width),
                                  _cellSize.height);
@@ -368,9 +370,9 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
     // Draw a margin at the top of the visible area.
     NSRect topMarginRect = _visibleRect;
     topMarginRect.origin.y -=
-        MAX(0, VMARGIN - NSMinY(_delegate.enclosingScrollView.documentVisibleRect));
+        MAX(0, self.verticalMargin - NSMinY(_delegate.enclosingScrollView.documentVisibleRect));
 
-    topMarginRect.size.height = VMARGIN;
+    topMarginRect.size.height = self.verticalMargin;
     [self.delegate drawingHelperDrawBackgroundImageInRect:topMarginRect
                                    blendDefaultBackground:YES];
 
@@ -380,10 +382,10 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 }
 
 - (void)drawMarginsAndMarkForLine:(int)line y:(CGFloat)y {
-    NSRect leftMargin = NSMakeRect(0, y, MARGIN, _cellSize.height);
+    NSRect leftMargin = NSMakeRect(0, y, self.horizontalMargin, _cellSize.height);
     NSRect rightMargin;
     NSRect visibleRect = _visibleRect;
-    rightMargin.origin.x = _cellSize.width * _gridSize.width + MARGIN;
+    rightMargin.origin.x = _cellSize.width * _gridSize.width + self.horizontalMargin;
     rightMargin.origin.y = y;
     rightMargin.size.width = visibleRect.size.width - rightMargin.origin.x;
     rightMargin.size.height = _cellSize.height;
@@ -434,7 +436,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
         return;
     }
     [_cursorGuideColor set];
-    NSPoint textOrigin = NSMakePoint(MARGIN + range.location * _cellSize.width, yOrigin);
+    NSPoint textOrigin = NSMakePoint(self.horizontalMargin + range.location * _cellSize.width, yOrigin);
     NSRect rect = NSMakeRect(textOrigin.x,
                              textOrigin.y,
                              range.length * _cellSize.width,
@@ -466,11 +468,11 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
     if (noteRanges.count) {
         for (NSValue *value in noteRanges) {
             VT100GridRange range = [value gridRangeValue];
-            CGFloat x = range.location * _cellSize.width + MARGIN;
+            CGFloat x = range.location * _cellSize.width + self.horizontalMargin;
             CGFloat y = line * _cellSize.height;
             [[NSColor yellowColor] set];
 
-            CGFloat maxX = MIN(_frame.size.width - MARGIN, range.length * _cellSize.width + x);
+            CGFloat maxX = MIN(_frame.size.width - self.horizontalMargin, range.length * _cellSize.width + x);
             CGFloat w = maxX - x;
             NSRectFill(NSMakeRect(x, y + _cellSize.height - 1.5, w, 1));
             [[NSColor orangeColor] set];
@@ -535,7 +537,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
     NSString *widest = [s stringByReplacingOccurrencesOfRegex:@"[\\d\\p{Alphabetic}]" withString:@"M"];
     NSSize size = [widest sizeWithAttributes:@{ NSFontAttributeName: [NSFont systemFontOfSize:10] }];
-    int w = size.width + MARGIN;
+    int w = size.width + self.horizontalMargin;
     int x = MAX(0, _frame.size.width - w);
     CGFloat y = line * _cellSize.height;
     NSColor *bgColor = [self defaultBackgroundColor];
@@ -624,7 +626,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
     NSData *matches = [_delegate drawingHelperMatchesOnLine:line];
     for (iTermBoxedBackgroundColorRun *box in backgroundRuns) {
         iTermBackgroundColorRun *run = box.valuePointer;
-        NSPoint textOrigin = NSMakePoint(MARGIN + run->range.location * _cellSize.width, y);
+        NSPoint textOrigin = NSMakePoint(self.horizontalMargin + run->range.location * _cellSize.width, y);
 
         [self constructAndDrawRunsForLine:theLine
                                       row:line
@@ -1043,7 +1045,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
                             NULL,
                             _useHFSPlusMapping);
         int cursorX = 0;
-        int baseX = floor(xStart * _cellSize.width + MARGIN);
+        int baseX = floor(xStart * _cellSize.width + self.horizontalMargin);
         int i;
         int y = (yStart + _numberOfLines - height) * _cellSize.height;
         int cursorY = y;
@@ -1113,14 +1115,14 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
             } else {
                 justWrapped = NO;
             }
-            x = floor(xStart * _cellSize.width + MARGIN);
+            x = floor(xStart * _cellSize.width + self.horizontalMargin);
             y = (yStart + _numberOfLines - height) * _cellSize.height;
             i += charsInLine;
         }
 
         if (!foundCursor && i == cursorIndex) {
             if (justWrapped) {
-                cursorX = MARGIN + width * _cellSize.width;
+                cursorX = self.horizontalMargin + width * _cellSize.width;
                 cursorY = preWrapY;
             } else {
                 cursorX = x;
@@ -1128,7 +1130,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
             }
         }
         const double kCursorWidth = 2.0;
-        double rightMargin = MARGIN + _gridSize.width * _cellSize.width;
+        double rightMargin = self.horizontalMargin + _gridSize.width * _cellSize.width;
         if (cursorX + kCursorWidth >= rightMargin) {
             // Make sure the cursor doesn't draw in the margin. Shove it left
             // a little bit so it fits.
@@ -1155,7 +1157,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
 - (NSRect)cursorFrame {
     const int rowNumber = _cursorCoord.y + _numberOfLines - _gridSize.height;
-    return NSMakeRect(floor(_cursorCoord.x * _cellSize.width + MARGIN),
+    return NSMakeRect(floor(_cursorCoord.x * _cellSize.width + self.horizontalMargin),
                       rowNumber * _cellSize.height + (_cellSize.height - _cellSizeWithoutSpacing.height),
                       MIN(_cellSize.width, _cellSizeWithoutSpacing.width),
                       _cellSizeWithoutSpacing.height);
@@ -1572,14 +1574,14 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 #pragma mark - Coord/Rect Utilities
 
 - (VT100GridCoordRange)coordRangeForRect:(NSRect)rect {
-    return VT100GridCoordRangeMake(floor((rect.origin.x - MARGIN) / _cellSize.width),
+    return VT100GridCoordRangeMake(floor((rect.origin.x - self.horizontalMargin) / _cellSize.width),
                                    floor(rect.origin.y / _cellSize.height),
-                                   ceil((NSMaxX(rect) - MARGIN) / _cellSize.width),
+                                   ceil((NSMaxX(rect) - self.horizontalMargin) / _cellSize.width),
                                    ceil(NSMaxY(rect) / _cellSize.height));
 }
 
 - (NSRect)rectForCoordRange:(VT100GridCoordRange)coordRange {
-    return NSMakeRect(coordRange.start.x * _cellSize.width + MARGIN,
+    return NSMakeRect(coordRange.start.x * _cellSize.width + self.horizontalMargin,
                       coordRange.start.y * _cellSize.height,
                       (coordRange.end.x - coordRange.start.x) * _cellSize.width,
                       (coordRange.end.y - coordRange.start.y) * _cellSize.height);
@@ -1600,8 +1602,8 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 
 - (NSRange)rangeOfColumnsFrom:(CGFloat)x ofWidth:(CGFloat)width {
     NSRange charRange;
-    charRange.location = MAX(0, (x - MARGIN) / _cellSize.width);
-    charRange.length = ceil((x + width - MARGIN) / _cellSize.width) - charRange.location;
+    charRange.location = MAX(0, (x - self.horizontalMargin) / _cellSize.width);
+    charRange.length = ceil((x + width - self.horizontalMargin) / _cellSize.width) - charRange.location;
     if (charRange.location + charRange.length > _gridSize.width) {
         charRange.length = _gridSize.width - charRange.location;
     }
@@ -1609,7 +1611,7 @@ extern int CGContextGetFontSmoothingStyle(CGContextRef);
 }
 
 - (NSRange)rangeOfVisibleRows {
-    int visibleRows = floor((_scrollViewContentSize.height - VMARGIN * 2) / _cellSize.height);
+    int visibleRows = floor((_scrollViewContentSize.height - self.verticalMargin * 2) / _cellSize.height);
     CGFloat top = _scrollViewDocumentVisibleRect.origin.y;
     int firstVisibleRow = floor(top / _cellSize.height);
     if (firstVisibleRow < 0) {

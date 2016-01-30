@@ -1044,7 +1044,7 @@ static const NSTimeInterval kAntiIdleGracePeriod = 0.1;
     // disentangle.
     [_wrapper setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
 
-    _textview = [[PTYTextView alloc] initWithFrame: NSMakeRect(0, VMARGIN, aSize.width, aSize.height)
+    _textview = [[PTYTextView alloc] initWithFrame: NSMakeRect(0, [[_profile objectForKey:KEY_VERTICAL_MARGIN] integerValue], aSize.width, aSize.height)
                                           colorMap:_colorMap];
     _colorMap.dimOnlyText = [iTermPreferences boolForKey:kPreferenceKeyDimOnlyText];
     [_textview setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable];
@@ -1056,9 +1056,12 @@ static const NSTimeInterval kAntiIdleGracePeriod = 0.1;
     const float theBlend =
         [_profile objectForKey:KEY_BLEND] ? [[_profile objectForKey:KEY_BLEND] floatValue] : 0.5;
     [self setBlend:theBlend];
+    
+    [_textview setHorizontalMargin:[[_profile objectForKey:KEY_HORIZONTAL_MARGIN] integerValue]];
+    [_textview setVerticalMargin:[[_profile objectForKey:KEY_VERTICAL_MARGIN] integerValue]];
 
     [_wrapper addSubview:_textview];
-    [_textview setFrame:NSMakeRect(0, VMARGIN, aSize.width, aSize.height - VMARGIN)];
+    [_textview setFrame:NSMakeRect(0, [[_profile objectForKey:KEY_VERTICAL_MARGIN] integerValue], aSize.width, aSize.height - [[_profile objectForKey:KEY_VERTICAL_MARGIN] integerValue])];
     [_textview release];
 
     // assign terminal and task objects
@@ -1066,8 +1069,8 @@ static const NSTimeInterval kAntiIdleGracePeriod = 0.1;
     [_shell setDelegate:self];
 
     // initialize the screen
-    int width = (aSize.width - MARGIN*2) / [_textview charWidth];
-    int height = (aSize.height - VMARGIN*2) / [_textview lineHeight];
+    int width = (aSize.width - [[_profile objectForKey:KEY_HORIZONTAL_MARGIN] integerValue]*2) / [_textview charWidth];
+    int height = (aSize.height - [[_profile objectForKey:KEY_VERTICAL_MARGIN] integerValue]*2) / [_textview lineHeight];
     // NB: In the bad old days, this returned whether setup succeeded because it would allocate an
     // enormous amount of memory. That's no longer an issue.
     [_screen destructivelySetScreenWidth:width height:height];
@@ -1186,7 +1189,7 @@ static const NSTimeInterval kAntiIdleGracePeriod = 0.1;
         if ([_view showTitle]) {
             x -= [SessionView titleHeight];
         }
-        x -= VMARGIN * 2;
+        x -= [[_profile objectForKey:KEY_VERTICAL_MARGIN] integerValue] * 2;
         int iLineHeight = [_textview lineHeight];
         if (iLineHeight == 0) {
             return 0;
@@ -1197,7 +1200,7 @@ static const NSTimeInterval kAntiIdleGracePeriod = 0.1;
         }
         return x;
     } else {
-        x -= MARGIN * 2;
+        x -= [[_profile objectForKey:KEY_HORIZONTAL_MARGIN] integerValue] * 2;
         int iCharWidth = [_textview charWidth];
         if (iCharWidth == 0) {
             return 0;
@@ -2012,8 +2015,8 @@ static const NSTimeInterval kAntiIdleGracePeriod = 0.1;
 
 - (NSSize)idealScrollViewSizeWithStyle:(NSScrollerStyle)scrollerStyle
 {
-    NSSize innerSize = NSMakeSize([_screen width] * [_textview charWidth] + MARGIN * 2,
-                                  [_screen height] * [_textview lineHeight] + VMARGIN * 2);
+    NSSize innerSize = NSMakeSize([_screen width] * [_textview charWidth] + [[_profile objectForKey:KEY_HORIZONTAL_MARGIN] integerValue] * 2,
+                                  [_screen height] * [_textview lineHeight] + [[_profile objectForKey:KEY_VERTICAL_MARGIN] integerValue] * 2);
     BOOL hasScrollbar = [[_tab realParentWindow] scrollbarShouldBeVisible];
     NSSize outerSize =
         [PTYScrollView frameSizeForContentSize:innerSize
@@ -2711,6 +2714,10 @@ static const NSTimeInterval kAntiIdleGracePeriod = 0.1;
     [_screen setCursorBlinks:[iTermProfilePreferences boolForKey:KEY_BLINKING_CURSOR inProfile:aDict]];
     [_textview setBlinkingCursor:[iTermProfilePreferences boolForKey:KEY_BLINKING_CURSOR inProfile:aDict]];
     [_textview setCursorType:[iTermProfilePreferences intForKey:KEY_CURSOR_TYPE inProfile:aDict]];
+    
+    // Margins
+    [_textview setHorizontalMargin:[iTermProfilePreferences intForKey:KEY_HORIZONTAL_MARGIN inProfile:aDict]];
+    [_textview setVerticalMargin:[iTermProfilePreferences intForKey:KEY_VERTICAL_MARGIN inProfile:aDict]];
 
     PTYTab* currentTab = [[[self tab] parentWindow] currentTab];
     if (currentTab == nil || currentTab == [self tab]) {

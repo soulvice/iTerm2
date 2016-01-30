@@ -243,6 +243,8 @@ NSString *const kProfilePreferenceInitialDirectoryAdvancedValue = @"Advanced";
                   KEY_APPLICATION_KEYPAD_ALLOWED: @NO,
                   KEY_PLACE_PROMPT_AT_FIRST_COLUMN: @YES,
                   KEY_SHOW_MARK_INDICATORS: @YES,
+                  KEY_HORIZONTAL_MARGIN: @15,
+                  KEY_VERTICAL_MARGIN: @15,
                 };
         [dict retain];
     }

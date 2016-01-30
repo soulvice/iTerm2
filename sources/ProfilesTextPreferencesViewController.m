@@ -58,6 +58,12 @@ static NSInteger kNonAsciiFontButtonTag = 1;
 
     // This view is added to the font panel.
     IBOutlet NSView *_displayFontAccessoryView;
+    
+    // Margins for ouside text
+    IBOutlet NSTextField *_hMargin;
+    IBOutlet NSTextField *_vMargin;
+    IBOutlet NSTextField *_hMarginLabel;
+    IBOutlet NSTextField *_vMarginLabel;
 }
 
 - (void)dealloc {
@@ -156,6 +162,16 @@ static NSInteger kNonAsciiFontButtonTag = 1;
                            key:KEY_NONASCII_ANTI_ALIASED
                           type:kPreferenceInfoTypeCheckbox];
     info.observer = ^{ [self updateWarnings]; };
+    
+    info = [self defineControl:_hMargin
+                           key:KEY_HORIZONTAL_MARGIN
+                          type:kPreferenceInfoTypeIntegerTextField];
+    info.range = NSMakeRange( 0, 100000);
+    
+    info = [self defineControl:_vMargin
+                           key:KEY_VERTICAL_MARGIN
+                          type:kPreferenceInfoTypeIntegerTextField];
+    info.range = NSMakeRange( 0, 100000);
 
     [self updateFontsDescriptions];
     [self updateNonAsciiFontViewVisibility];

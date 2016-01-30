@@ -201,6 +201,10 @@
 // Dynamic Profiles (not in prefs ui)
 #define KEY_DYNAMIC_PROFILE_PARENT_NAME      @"Dynamic Profile Parent Name"
 
+// Horizontal and Vertical Margins
+#define KEY_HORIZONTAL_MARGIN                @"Horizontal Margin"
+#define KEY_VERTICAL_MARGIN                  @"Vertical Margin"
+
 // Minimum time between sending anti-idle codes. "1" otherwise results in a flood.
 extern const NSTimeInterval kMinimumAntiIdlePeriod;
 

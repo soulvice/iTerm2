@@ -569,8 +569,8 @@
     [session setWidth:size.width height:size.height];
     NSRect theFrame = NSMakeRect(0,
                                  0,
-                                 size.width * session.textview.charWidth + MARGIN * 2,
-                                 size.height * session.textview.lineHeight + VMARGIN * 2);
+                                 size.width * session.textview.charWidth + [profile[KEY_HORIZONTAL_MARGIN] integerValue] * 2,
+                                 size.height * session.textview.lineHeight + [profile[KEY_VERTICAL_MARGIN] integerValue] * 2);
     session.view.frame = theFrame;
     [session loadInitialColorTable];
     [session setBookmarkName:profile[KEY_NAME]];

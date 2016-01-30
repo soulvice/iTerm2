@@ -532,8 +532,8 @@ static NSDate* lastResizeDate_;
 - (NSSize)compactFrame {
     NSSize cellSize = NSMakeSize([[_session textview] charWidth], [[_session textview] lineHeight]);
     NSSize dim = NSMakeSize([_session columns], [_session rows]);
-    NSSize innerSize = NSMakeSize(cellSize.width * dim.width + MARGIN * 2,
-                                  cellSize.height * dim.height + VMARGIN * 2);
+    NSSize innerSize = NSMakeSize(cellSize.width * dim.width + [[_session textview] horizontalMargin] * 2,
+                                  cellSize.height * dim.height + [[_session textview] verticalMargin] * 2);
     const BOOL hasScrollbar = [[_session scrollview] hasVerticalScroller];
     NSSize size =
         [PTYScrollView frameSizeForContentSize:innerSize
@@ -586,7 +586,7 @@ static NSDate* lastResizeDate_;
 
 - (void)updateScrollViewFrame {
     int lineHeight = [[_session textview] lineHeight];
-    int margins = VMARGIN * 2;
+    int margins = [[_session textview] verticalMargin] * 2;
     CGFloat titleHeight = _showTitle ? _title.frame.size.height : 0;
     NSRect rect = NSMakeRect(0,
                              0,

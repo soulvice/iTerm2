@@ -335,8 +335,7 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
             return NSBorderlessWindowMask;
 
         default:
-            return (NSTitledWindowMask |
-                    NSClosableWindowMask |
+            return (NSClosableWindowMask |
                     NSMiniaturizableWindowMask |
                     NSResizableWindowMask |
                     NSTexturedBackgroundWindowMask);
@@ -2441,7 +2440,7 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
             // If the screen grew and the window was smaller than the desired number of rows, grow it.
             if (desiredRows_ > 0) {
                 frame.size.height = MIN(screenVisibleFrame.size.height,
-                                        ceil([[session textview] lineHeight] * desiredRows_) + decorationSize.height + 2 * VMARGIN);
+                                        ceil([[session textview] lineHeight] * desiredRows_) + decorationSize.height + 2 * [[session textview] verticalMargin]);
             } else {
                 frame.size.height = MIN(screenVisibleFrame.size.height, frame.size.height);
             }
@@ -2468,7 +2467,7 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
             // If the screen grew and the window was smaller than the desired number of rows, grow it.
             if (desiredRows_ > 0) {
                 frame.size.height = MIN(screenVisibleFrame.size.height,
-                                        ceil([[session textview] lineHeight] * desiredRows_) + decorationSize.height + 2 * VMARGIN);
+                                        ceil([[session textview] lineHeight] * desiredRows_) + decorationSize.height + 2 * [[session textview] verticalMargin]);
             } else {
                 frame.size.height = MIN(screenVisibleFrame.size.height, frame.size.height);
             }
@@ -2495,7 +2494,7 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
             // If the screen grew and the window was smaller than the desired number of columns, grow it.
             if (desiredColumns_ > 0) {
                 frame.size.width = MIN(screenVisibleFrame.size.width,
-                                       [[session textview] charWidth] * desiredColumns_ + 2 * MARGIN);
+                                       [[session textview] charWidth] * desiredColumns_ + 2 * [[session textview] horizontalMargin]);
             } else {
                 frame.size.width = MIN(screenVisibleFrame.size.width, frame.size.width);
             }
@@ -2522,7 +2521,7 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
             // If the screen grew and the window was smaller than the desired number of columns, grow it.
             if (desiredColumns_ > 0) {
                 frame.size.width = MIN(screenVisibleFrame.size.width,
-                                       [[session textview] charWidth] * desiredColumns_ + 2 * MARGIN);
+                                       [[session textview] charWidth] * desiredColumns_ + 2 * [[session textview] horizontalMargin]);
             } else {
                 frame.size.width = MIN(screenVisibleFrame.size.width, frame.size.width);
             }
@@ -2853,14 +2852,14 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
                               controlSize:NSRegularControlSize
                             scrollerStyle:[self scrollerStyle]];
 
-    int screenWidth = (contentSize.width - MARGIN * 2) / charWidth;
-    int screenHeight = (contentSize.height - VMARGIN * 2) / charHeight;
+    int screenWidth = (contentSize.width - [[session textview] horizontalMargin] * 2) / charWidth;
+    int screenHeight = (contentSize.height - [[session textview] verticalMargin] * 2) / charHeight;
 
     if (snapWidth) {
-      contentSize.width = screenWidth * charWidth + MARGIN * 2;
+      contentSize.width = screenWidth * charWidth + [[session textview] horizontalMargin] * 2;
     }
     if (snapHeight) {
-      contentSize.height = screenHeight * charHeight + VMARGIN * 2;
+      contentSize.height = screenHeight * charHeight + [[session textview] verticalMargin] * 2;
     }
     tabSize =
         [PTYScrollView frameSizeForContentSize:contentSize
@@ -3184,8 +3183,8 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
     NSSize decorationSize = [self windowDecorationSize];
     VT100GridSize sessionSize = VT100GridSizeMake([session.profile[KEY_COLUMNS] intValue],
                                                   [session.profile[KEY_ROWS] intValue]);
-    return NSMakeSize(MARGIN * 2 + sessionSize.width * cellSize.width + decorationSize.width,
-                      VMARGIN * 2 + sessionSize.height * cellSize.height + decorationSize.height);
+    return NSMakeSize([[session textview] horizontalMargin] * 2 + sessionSize.width * cellSize.width + decorationSize.width,
+                      [[session textview] verticalMargin] * 2 + sessionSize.height * cellSize.height + decorationSize.height);
 }
 
 - (void)toggleTraditionalFullScreenMode
@@ -3518,15 +3517,17 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
         // This is actually called twice in a row when entering fullscreen.
         return defaultFrame;
     }
+    
+    PTYSession *session = [self currentSession];
 
     // This function attempts to size the window to fit the screen with exactly
     // MARGIN/VMARGIN-sized margins for the current session. If there are split
     // panes then the margins probably won't turn out perfect. If other tabs have
     // a different char size, they will also have imperfect margins.
     float decorationHeight = [sender frame].size.height -
-        [[[self currentSession] scrollview] documentVisibleRect].size.height + VMARGIN * 2;
+        [[session scrollview] documentVisibleRect].size.height + [[session textview] verticalMargin] * 2;
     float decorationWidth = [sender frame].size.width -
-        [[[self currentSession] scrollview] documentVisibleRect].size.width + MARGIN * 2;
+        [[session scrollview] documentVisibleRect].size.width + [[session textview] horizontalMargin] * 2;
 
     float charHeight = [self maxCharHeight:nil];
     float charWidth = [self maxCharWidth:nil];
@@ -4841,8 +4842,8 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
                                            verticalSpacing:[[theBookmark objectForKey:KEY_VERTICAL_SPACING] floatValue]];
     NSSize charSize = NSMakeSize(MAX(asciiCharSize.width, nonAsciiCharSize.width),
                                  MAX(asciiCharSize.height, nonAsciiCharSize.height));
-    NSSize newSessionSize = NSMakeSize(charSize.width * kVT100ScreenMinColumns + MARGIN * 2,
-                                       charSize.height * kVT100ScreenMinRows + VMARGIN * 2);
+    NSSize newSessionSize = NSMakeSize(charSize.width * kVT100ScreenMinColumns + [[theBookmark objectForKey:KEY_HORIZONTAL_MARGIN] integerValue] * 2,
+                                       charSize.height * kVT100ScreenMinRows + [[theBookmark objectForKey:KEY_VERTICAL_MARGIN] integerValue] * 2);
 
     return [[self currentTab] canSplitVertically:isVertical withSize:newSessionSize];
 }
@@ -5323,7 +5324,7 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
             if (desiredColumns_ > 0) {
                 frame.size.width = MIN(winSize.width,
                                        ceil([[session textview] charWidth] *
-                                            desiredColumns_) + decorationSize.width + 2 * MARGIN);
+                                            desiredColumns_) + decorationSize.width + 2 * [[session textview] horizontalMargin]);
             } else {
                 frame.size.width = winSize.width;
             }
@@ -6228,8 +6229,8 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
 
     if (size == nil && [_contentView.tabView numberOfTabViewItems] != 0) {
         NSSize contentSize = [[[self currentSession] scrollview] documentVisibleRect].size;
-        rows = (contentSize.height - VMARGIN*2) / charSize.height;
-        columns = (contentSize.width - MARGIN*2) / charSize.width;
+        rows = (contentSize.height - [[[self currentSession] textview] verticalMargin]*2) / charSize.height;
+        columns = (contentSize.width - [[[self currentSession] textview] horizontalMargin]*2) / charSize.width;
     }
     NSRect sessionRect;
     if (size != nil) {
@@ -6241,12 +6242,12 @@ static NSString* TERMINAL_ARRANGEMENT_HIDING_TOOLBELT_SHOULD_RESIZE_WINDOW = @"H
                                    borderType:NSNoBorder
                                   controlSize:NSRegularControlSize
                                 scrollerStyle:[self scrollerStyle]];
-        rows = (contentSize.height - VMARGIN*2) / charSize.height;
-        columns = (contentSize.width - MARGIN*2) / charSize.width;
+        rows = (contentSize.height - [[aSession textview] verticalMargin]*2) / charSize.height;
+        columns = (contentSize.width - [[aSession textview] horizontalMargin]*2) / charSize.width;
         sessionRect.origin = NSZeroPoint;
         sessionRect.size = *size;
     } else {
-        sessionRect = NSMakeRect(0, 0, columns * charSize.width + MARGIN * 2, rows * charSize.height + VMARGIN * 2);
+        sessionRect = NSMakeRect(0, 0, columns * charSize.width + [[aSession textview] horizontalMargin] * 2, rows * charSize.height + [[aSession textview] verticalMargin] * 2);
     }
 
     if ([aSession setScreenSize:sessionRect parent:self]) {

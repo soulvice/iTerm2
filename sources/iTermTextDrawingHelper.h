@@ -13,10 +13,10 @@
 #import "VT100GridTypes.h"
 
 // Number of pixels margin on left and right edge.
-#define MARGIN 5
+#define MARGIN 12
 
 // Number of pixels margin on the top.
-#define VMARGIN 2
+#define VMARGIN 12
 
 @class iTermColorMap;
 @class iTermFindOnPageHelper;
@@ -240,6 +240,10 @@
 
 // Change the cursor to indicate that a search is being performed.
 @property(nonatomic, assign) BOOL showSearchingCursor;
+
+// Change Margins
+@property(nonatomic, assign) NSInteger horizontalMargin;
+@property(nonatomic, assign) NSInteger verticalMargin;
 
 // Updates self.blinkingFound.
 - (void)drawTextViewContentInRect:(NSRect)rect

@@ -1466,8 +1466,8 @@ static NSString* FormatRect(NSRect r) {
     double lineHeight = cellSize.height;
     NSSize size;
     PtyLog(@"    session size based on %d rows", rows);
-    size.width = columns * charWidth + MARGIN * 2;
-    size.height = rows * lineHeight + VMARGIN * 2;
+    size.width = columns * charWidth + [[[term currentSession] textview] horizontalMargin] * 2;
+    size.height = rows * lineHeight + [[[term currentSession] textview] verticalMargin] * 2;
 
     BOOL hasScrollbar = [term scrollbarShouldBeVisible];
     NSSize outerSize =
@@ -1497,8 +1497,8 @@ static NSString* FormatRect(NSRect r) {
 {
     NSSize size;
     PTYSession* session = [sessionView session];
-    size.width = kVT100ScreenMinColumns * [[session textview] charWidth] + MARGIN * 2;
-    size.height = kVT100ScreenMinRows * [[session textview] lineHeight] + VMARGIN * 2;
+    size.width = kVT100ScreenMinColumns * [[session textview] charWidth] + [[session textview] horizontalMargin] * 2;
+    size.height = kVT100ScreenMinRows * [[session textview] lineHeight] + [[session textview] verticalMargin] * 2;
 
     BOOL hasScrollbar = [parentWindow_ scrollbarShouldBeVisible];
     NSSize scrollViewSize =
@@ -1896,8 +1896,8 @@ static NSString* FormatRect(NSRect r) {
     [[aSession scrollview] setHasVerticalScroller:hasScrollbar];
     NSSize size = [[aSession view] maximumPossibleScrollViewContentSize];
     DLog(@"Max size is %@", [NSValue valueWithSize:size]);
-    int width = (size.width - MARGIN*2) / [[aSession textview] charWidth];
-    int height = (size.height - VMARGIN*2) / [[aSession textview] lineHeight];
+    int width = (size.width - [[aSession textview] horizontalMargin]*2) / [[aSession textview] charWidth];
+    int height = (size.height - [[aSession textview] verticalMargin]*2) / [[aSession textview] lineHeight];
     PtyLog(@"fitSessionToCurrentViewSize %@ gives %d rows", [NSValue valueWithSize:size], height);
     if (width <= 0) {
         NSLog(@"WARNING: Session has %d width", width);
@@ -2894,8 +2894,8 @@ static NSString* FormatRect(NSRect r) {
             PTYSession *session = [sv session];
             NSRect svFrame = [[session scrollview] frame];
             NSRect visibleFrame = [[session scrollview] documentVisibleRect];  // excludes scrollbar, if any
-            int chars = forHeight ? (svFrame.size.height - VMARGIN * 2) / cellSize.height :
-                                    (visibleFrame.size.width - MARGIN * 2) / cellSize.width;
+            int chars = forHeight ? (svFrame.size.height - [[session textview] verticalMargin] * 2) / cellSize.height :
+                                    (visibleFrame.size.width - [[session textview] horizontalMargin] * 2) / cellSize.width;
             [intervalMap incrementNumbersBy:chars
                                     inRange:[IntRange rangeWithMin:minPos size:size]];
         }
